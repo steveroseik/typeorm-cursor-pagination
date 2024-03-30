@@ -137,23 +137,21 @@ export default class Paginator<Entity extends ObjectLiteral> {
   }
 
   private buildCursorQuery(where: WhereExpressionBuilder, cursors: CursorParam): void {
-  const operator = this.getOperator();
-  const params: CursorParam = {};
-  let conditionStrings: string[] = [];
-  this.paginationKeys.forEach((key) => {
-    params[key] = cursors[key];
-    conditionStrings.push(`${this.alias}.${key} ${operator} :${key}`);
-  });
-  
-  // Join individual condition strings with 'AND'
-  const combinedCondition = conditionStrings.join(' AND ');
-
-  // Enclose the combined condition within brackets
-  const bracketedCondition = `(${combinedCondition})`;
-
-  // Add the bracketed condition to the query
-  where.orWhere(bracketedCondition, params);
-}
+    const operator = this.getOperator();
+    const params: CursorParam = {};
+    console.log('==== START');
+    let query = '';
+    this.paginationKeys.forEach((key) => {
+      
+      params[key] = cursors[key];
+      where.orWhere(`${query}${this.alias}.${key} ${operator} :${key}`, params);
+      query = `${query}${this.alias}.${key} = :${key} AND `;
+      console.log(`params: ${params}`);
+      console.log(`key: ${key}`);
+      console.log(`obj: ${params[key]}`);
+      console.log(`query: ${query}`);
+    });
+  }
 
   private getOperator(): string {
     if (this.hasAfterCursor()) {
