@@ -137,14 +137,19 @@ export default class Paginator<Entity extends ObjectLiteral> {
   }
 
   private buildCursorQuery(where: WhereExpressionBuilder, cursors: CursorParam): void {
-    const operator = this.getOperator();
-    const params: CursorParam = {};
-    let query = '';
-    this.paginationKeys.forEach((key) => {
-      params[key] = cursors[key];
-      where.orWhere(`${query}${this.alias}.${key} ${operator} :${key}`, params);
-      query = `(${query}${this.alias}.${key} = :${key}) AND `;
-    });
+      const operator = this.getOperator();
+      let query = '';
+
+      this.paginationKeys.forEach((key, index) => {
+        if (index === 0) {
+          query += `(${this.alias}.${key} ${operator} :${key}`;
+        } else {
+          query += ` OR ${this.alias}.${key} ${operator} :${key}`;
+        }
+      });
+
+      query += ')';
+      where.andWhere(query, cursors);
   }
 
   private getOperator(): string {
