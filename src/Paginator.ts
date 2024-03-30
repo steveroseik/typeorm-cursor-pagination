@@ -143,7 +143,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
     this.paginationKeys.forEach((key) => {
       params[key] = cursors[key];
       where.orWhere(`${query}${this.alias}.${key} ${operator} :${key}`, params);
-      query = `${query}${this.alias}.${key} = :${key} AND `;
+      query = `(${query}${this.alias}.${key} = :${key}) AND `;
     });
   }
 
